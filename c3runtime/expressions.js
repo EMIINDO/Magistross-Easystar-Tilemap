@@ -1,7 +1,8 @@
 "use strict";
 
 {
-	self.C3.Behaviors.EasystarTilemap.Exps =
+	const C3 = globalThis.C3;
+	C3.Behaviors.EasystarTilemap.Exps =
 	{
 		PathLength(tag)
 		{

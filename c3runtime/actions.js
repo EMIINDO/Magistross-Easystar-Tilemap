@@ -1,7 +1,8 @@
 "use strict";
 
 {
-	self.C3.Behaviors.EasystarTilemap.Acts =
+	const C3 = globalThis.C3;
+	C3.Behaviors.EasystarTilemap.Acts =
 	{
 
 		ForceCalculate()

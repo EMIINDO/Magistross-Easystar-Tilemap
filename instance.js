@@ -1,8 +1,9 @@
 "use strict";
 
 {
-	const SDK = self.SDK;
-	const BEHAVIOR_CLASS = SDK.Behaviors.EasystarTilemap;
+	// callMap path/SDK/instance.js
+	const SDK = globalThis.SDK;
+    const BEHAVIOR_CLASS = SDK.Behaviors.EasystarTilemap;
 
 	BEHAVIOR_CLASS.Instance = class EasystarTilemapInstance extends SDK.IBehaviorInstanceBase
 	{

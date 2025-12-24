@@ -1,21 +1,15 @@
 "use strict";
 
 {
-	const SDK = self.SDK;
-	C3.Behaviors.EasystarTilemap.Type = class EasystarTilemapType extends C3.SDKBehaviorTypeBase
+    const C3 = globalThis.C3;
+	C3.Behaviors.EasystarTilemap.Type = class EasystarTilemapType extends globalThis.ISDKBehaviorTypeBase
 	{
-		constructor(behaviorType)
+		constructor()
 		{
-			super(behaviorType);
+			super();
 		}
 		
-		Release()
-		{
-			super.Release();
-		}
-		
-		OnCreate()
-		{	
+		_onCreate() {	
 		}
 	};
 }
