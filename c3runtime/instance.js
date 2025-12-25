@@ -2,19 +2,19 @@
 
 globalThis.EasyStar =
 /******/ (function (modules) { // webpackBootstrap
-/******/ 	var installedModules = {};
-/******/ 	function __webpack_require__(moduleId) {
-/******/ 		if (installedModules[moduleId]) return installedModules[moduleId].exports;
-/******/ 		var module = installedModules[moduleId] = { exports: {}, id: moduleId, loaded: false };
-/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
-/******/ 		module.loaded = true;
-/******/ 		return module.exports;
+/******/    var installedModules = {};
+/******/    function __webpack_require__(moduleId) {
+/******/        if (installedModules[moduleId]) return installedModules[moduleId].exports;
+/******/        var module = installedModules[moduleId] = { exports: {}, id: moduleId, loaded: false };
+/******/        modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/        module.loaded = true;
+/******/        return module.exports;
             /******/
 }
-/******/ 	__webpack_require__.m = modules;
-/******/ 	__webpack_require__.c = installedModules;
-/******/ 	__webpack_require__.p = "";
-/******/ 	return __webpack_require__(0);
+/******/    __webpack_require__.m = modules;
+/******/    __webpack_require__.c = installedModules;
+/******/    __webpack_require__.p = "";
+/******/    return __webpack_require__(0);
         /******/
 })
         ([
@@ -221,14 +221,14 @@ globalThis.EasyStar =
                 };
                 EasyStar.TOP = 'TOP'; EasyStar.TOP_RIGHT = 'TOP_RIGHT'; EasyStar.RIGHT = 'RIGHT'; EasyStar.BOTTOM_RIGHT = 'BOTTOM_RIGHT'; EasyStar.BOTTOM = 'BOTTOM'; EasyStar.BOTTOM_LEFT = 'BOTTOM_LEFT'; EasyStar.LEFT = 'LEFT'; EasyStar.TOP_LEFT = 'TOP_LEFT';
                 /***/
-},
+            },
 /* 1 */
 /***/ function (module, exports) {
                 module.exports = function () {
                     this.pointsToAvoid = {}; this.startX; this.callback; this.startY; this.endX; this.endY; this.nodeHash = {}; this.openList;
                 };
                 /***/
-},
+            },
 /* 2 */
 /***/ function (module, exports) {
                 module.exports = function (parent, x, y, costSoFar, simpleDistanceToTarget) {
@@ -236,12 +236,12 @@ globalThis.EasyStar =
                     this.bestGuessDistance = function () { return this.costSoFar + this.simpleDistanceToTarget; };
                 };
                 /***/
-},
+            },
 /* 3 */
 /***/ function (module, exports, __webpack_require__) {
                 module.exports = __webpack_require__(4);
                 /***/
-},
+            },
 /* 4 */
 /***/ function (module, exports, __webpack_require__) {
                 var Heap, defaultCmp, floor, heapify, heappop, heappush, heappushpop, heapreplace, insort, min, nlargest, nsmallest, updateItem, _siftdown, _siftup;
@@ -346,7 +346,7 @@ globalThis.EasyStar =
                     else root.Heap = factory();
                 })(this, function () { return Heap; });
                 /***/
-}
+            }
         ]);
 
 {
@@ -355,7 +355,6 @@ globalThis.EasyStar =
     C3.Behaviors.EasystarTilemap.Instance = class EasystarTilemapInstance extends globalThis.ISDKBehaviorInstanceBase {
         constructor() {
             super();
-
             this._isInitialized = false;
             this.easystarjs = new globalThis["EasyStar"]["js"]();
             this.paths = {};
@@ -363,7 +362,7 @@ globalThis.EasyStar =
             this.baseSetTileAt = null;
             this.emptyWalkable = false;
 
-            const properties = this._getInitProperties(); //
+            const properties = this._getInitProperties();
             if (properties) {
                 if (properties[0] === 0) this.easystarjs["enableDiagonals"]();
                 else this.easystarjs["disableDiagonals"]();
@@ -381,107 +380,89 @@ globalThis.EasyStar =
             let arr = [];
             if (this.emptyWalkable) arr.push(-1 & 0x1FFFFFFF);
             this.easystarjs["setAcceptableTiles"](arr);
-
-            this._setTicking(true); // Enable SDK v2 ticking system
+            this._setTicking(true);
         }
 
         _initRuntimeHook() {
             if (this._isInitialized) return;
 
-            // In SDK v2 Behavior, this._inst refers directly to the SDK Instance of the host object (Tilemap)
             const sdkInst = this._inst;
-
-            // Make sure the host object is ready and has the necessary Tilemap methods.
             if (!sdkInst || typeof sdkInst.GetMapHeight !== "function") return;
 
-            // Keep the original SetTileAt function from the internal SDK (PascalCase)
             this.baseSetTileAt = sdkInst.SetTileAt;
 
             const mapHeight = sdkInst.GetMapHeight();
             const mapWidth = sdkInst.GetMapWidth();
             const tilegrid = globalThis.erenf.createArray(mapHeight, mapWidth);
 
-            // Overrides are done at the SDK level to keep it in sync with the engine.
             sdkInst.SetTileAt = (x_, y_, t_) => {
-                x_ = Math.floor(x_);
-                y_ = Math.floor(y_);
+                x_ = Math.floor(x_); y_ = Math.floor(y_);
                 if (x_ < 0 || y_ < 0 || x_ >= mapWidth || y_ >= mapHeight) return -1;
-
                 tilegrid[y_][x_] = t_ & 0x1FFFFFFF;
-                // Call the native function using context sdkInst
                 this.baseSetTileAt.call(sdkInst, x_, y_, t_);
             };
 
-            // Use the helper by passing sdkInst directly
             globalThis.erenf.fillGridFromTilemap(tilegrid, sdkInst);
             this.easystarjs["setGrid"](tilegrid);
-
             this._isInitialized = true;
         }
 
         _tick() {
             if (!this._isInitialized) {
                 this._initRuntimeHook();
-                return;
             }
 
-            if (!this.easystarjs) return;
+            if (!this.easystarjs || !this._isInitialized) return;
 
             const sdkInst = this._inst;
             const currentGrid = this.easystarjs["getGrid"]();
 
-            // Ensure grid synchronization using internal PascalCase methods
             if (sdkInst && sdkInst.GetMapHeight && (!currentGrid || currentGrid.length !== sdkInst.GetMapHeight() || currentGrid[0].length !== sdkInst.GetMapWidth())) {
                 const tilegrid = globalThis.erenf.createArray(sdkInst.GetMapHeight(), sdkInst.GetMapWidth());
                 globalThis.erenf.fillGridFromTilemap(tilegrid, sdkInst);
                 this.easystarjs["setGrid"](tilegrid);
             }
-
             this.easystarjs["calculate"]();
         }
 
         doPathingRequest(tag_, x_, y_, x2_, y2_) {
             const sdkInst = this._inst;
-            if (!this._isInitialized) this._initRuntimeHook();
+
+            if (!this._isInitialized) {
+                this._initRuntimeHook();
+            }
 
             const notFound = () => {
-                this.curTag = tag_;
-                delete this.paths[tag_];
-                this._trigger(C3.Behaviors.EasystarTilemap.Cnds.OnFailedToFindPath); //
+                this.curTag = tag_; delete this.paths[tag_];
+                this._trigger(C3.Behaviors.EasystarTilemap.Cnds.OnFailedToFindPath);
                 this._trigger(C3.Behaviors.EasystarTilemap.Cnds.OnAnyPathNotFound);
             };
             const found = (path) => {
-                this.curTag = tag_;
-                this.paths[tag_] = path;
+                this.curTag = tag_; this.paths[tag_] = path;
                 this._trigger(C3.Behaviors.EasystarTilemap.Cnds.OnPathFound);
                 this._trigger(C3.Behaviors.EasystarTilemap.Cnds.OnAnyPathFound);
             };
 
-            // Use internal PascalCase methods for boundary validation
-            if (sdkInst && sdkInst.GetMapWidth && (x_ < 0 || y_ < 0 || x2_ < 0 || y2_ < 0 ||
-                x_ >= sdkInst.GetMapWidth() || x2_ >= sdkInst.GetMapWidth() ||
-                y_ >= sdkInst.GetMapHeight() || y2_ >= sdkInst.GetMapHeight())) {
+            if (!this.easystarjs["getGrid"]()) {
+                return;
+            }
+
+            if (sdkInst && (x_ < 0 || y_ < 0 || x2_ < 0 || y2_ < 0 || x_ >= sdkInst.GetMapWidth() || x2_ >= sdkInst.GetMapWidth() || y_ >= sdkInst.GetMapHeight() || y2_ >= sdkInst.GetMapHeight())) {
                 notFound();
             } else {
-                this.easystarjs["findPath"](x_, y_, x2_, y2_, (path) => {
-                    if (path === null) notFound(); else found(path);
-                });
+                this.easystarjs["findPath"](x_, y_, x2_, y2_, (path) => { if (path === null) notFound(); else found(path); });
             }
         }
 
         _release() {
-            const sdkInst = this._inst || (this.instance ? this.instance.getSdkInstance() : null);
+            const sdkInst = this._inst;
             if (this._isInitialized && sdkInst) {
                 sdkInst.SetTileAt = this.baseSetTileAt;
             }
             this.paths = {};
-            super._release(); //
+            super._release();
         }
 
-     
-        
-
-        // The save/load method remains the same following the SDK v2 standard.
         _saveToJson() {
             return {
                 "paths": this.paths,
@@ -516,14 +497,16 @@ globalThis.EasyStar =
             if (!acceptableTiles || !collisionGrid || x < 0 || y < 0 || x > collisionGrid[0].length - 1 || y > collisionGrid.length - 1) return false;
             if (sourceX !== undefined && sourceY !== undefined) {
                 if (Math.abs(sourceX - x) > 1 || Math.abs(sourceY - y) > 1) return false;
-                const condition = this.easystarjs["getDirectionalConditions"]()?.[y]?.[x];
+                const dirConditions = this.easystarjs["getDirectionalConditions"]();
+                const condition = dirConditions && dirConditions[y] && dirConditions[y][x];
                 if (condition) {
                     const direction = globalThis.erenf.calculateDirection(sourceX - x, sourceY - y);
                     if (!condition.includes(direction)) return false;
                 }
             }
             if (pointsToAvoid[y]?.[x] === undefined) {
-                return acceptableTiles.includes(collisionGrid[y][x]);
+                const tileValue = collisionGrid[y][x];
+                return acceptableTiles.includes(tileValue);
             }
             return false;
         }
