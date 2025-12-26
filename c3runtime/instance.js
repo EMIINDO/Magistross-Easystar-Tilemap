@@ -380,14 +380,15 @@ globalThis.EasyStar =
             let arr = [];
             if (this.emptyWalkable) arr.push(-1 & 0x1FFFFFFF);
             this.easystarjs["setAcceptableTiles"](arr);
+
             this._setTicking(true);
         }
 
         _initRuntimeHook() {
-            if (this._isInitialized) return;
+            if (this._isInitialized) return true;
 
             const sdkInst = this._inst;
-            if (!sdkInst || typeof sdkInst.GetMapHeight !== "function") return;
+            if (!sdkInst || typeof sdkInst.GetMapHeight !== "function") return false;
 
             this.baseSetTileAt = sdkInst.SetTileAt;
 
@@ -405,13 +406,11 @@ globalThis.EasyStar =
             globalThis.erenf.fillGridFromTilemap(tilegrid, sdkInst);
             this.easystarjs["setGrid"](tilegrid);
             this._isInitialized = true;
+            return true;
         }
 
         _tick() {
-            if (!this._isInitialized) {
-                this._initRuntimeHook();
-            }
-
+            if (!this._isInitialized) this._initRuntimeHook();
             if (!this.easystarjs || !this._isInitialized) return;
 
             const sdkInst = this._inst;
@@ -426,40 +425,47 @@ globalThis.EasyStar =
         }
 
         doPathingRequest(tag_, x_, y_, x2_, y2_) {
-            const sdkInst = this._inst;
-
             if (!this._isInitialized) {
-                this._initRuntimeHook();
+                const success = this._initRuntimeHook();
+                if (!success) return; 
             }
 
+            const sdkInst = this._inst;
+            const grid = this.easystarjs["getGrid"]();
+
             const notFound = () => {
-                this.curTag = tag_; delete this.paths[tag_];
+                this.curTag = tag_;
+                delete this.paths[tag_];
                 this._trigger(C3.Behaviors.EasystarTilemap.Cnds.OnFailedToFindPath);
                 this._trigger(C3.Behaviors.EasystarTilemap.Cnds.OnAnyPathNotFound);
             };
+
             const found = (path) => {
-                this.curTag = tag_; this.paths[tag_] = path;
+                this.curTag = tag_;
+                this.paths[tag_] = path;
                 this._trigger(C3.Behaviors.EasystarTilemap.Cnds.OnPathFound);
                 this._trigger(C3.Behaviors.EasystarTilemap.Cnds.OnAnyPathFound);
             };
 
-            if (!this.easystarjs["getGrid"]()) {
-                return;
-            }
+            if (!grid) return; 
 
-            if (sdkInst && (x_ < 0 || y_ < 0 || x2_ < 0 || y2_ < 0 || x_ >= sdkInst.GetMapWidth() || x2_ >= sdkInst.GetMapWidth() || y_ >= sdkInst.GetMapHeight() || y2_ >= sdkInst.GetMapHeight())) {
+
+            if (x_ < 0 || y_ < 0 || x2_ < 0 || y2_ < 0 ||
+                x_ >= sdkInst.GetMapWidth() || x2_ >= sdkInst.GetMapWidth() ||
+                y_ >= sdkInst.GetMapHeight() || y2_ >= sdkInst.GetMapHeight()) {
                 notFound();
             } else {
-                this.easystarjs["findPath"](x_, y_, x2_, y2_, (path) => { if (path === null) notFound(); else found(path); });
+                this.easystarjs["findPath"](x_, y_, x2_, y2_, (path) => {
+                    if (path === null) notFound();
+                    else found(path);
+                });
             }
         }
 
         _release() {
-            const sdkInst = this._inst;
-            if (this._isInitialized && sdkInst) {
-                sdkInst.SetTileAt = this.baseSetTileAt;
+            if (this._isInitialized && this._inst) {
+                this._inst.SetTileAt = this.baseSetTileAt;
             }
-            this.paths = {};
             super._release();
         }
 
