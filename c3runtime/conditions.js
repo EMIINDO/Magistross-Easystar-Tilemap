@@ -4,15 +4,13 @@
 	const C3 = globalThis.C3;
 	C3.Behaviors.EasystarTilemap.Cnds =
 	{
-		OnPathFound(tag)
-		{
-			return C3.equalsNoCase(tag, this.curTag);
-		},
-		
-		OnFailedToFindPath(tag)
-		{
-			return C3.equalsNoCase(tag, this.curTag);
-		},
+		OnPathFound(tag) {
+               return C3.equalsNoCase(tag, this.curTag);
+          },
+          
+          OnFailedToFindPath(tag) {
+               return C3.equalsNoCase(tag, this.curTag);
+          },
 
 		OnAnyPathFound()
 		{
